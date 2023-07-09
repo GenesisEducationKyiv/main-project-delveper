@@ -9,7 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/GenesisEducationKyiv/main-project-delveper/internal/transport"
+	"github.com/GenesisEducationKyiv/main-project-delveper/api"
+	"github.com/GenesisEducationKyiv/main-project-delveper/internal/rate"
+	"github.com/GenesisEducationKyiv/main-project-delveper/internal/subscription"
 	"github.com/GenesisEducationKyiv/main-project-delveper/sys/env"
 	"github.com/GenesisEducationKyiv/main-project-delveper/sys/logger"
 )
@@ -19,12 +21,18 @@ func main() {
 	defer log.Sync()
 
 	if err := run(log); err != nil {
-		log.Errorw("Startup error", "error", err)
+		log.Errorw("startup error", "error", err)
 	}
 }
 
 func run(log *logger.Logger) error {
 	var cfg struct {
+		Api struct {
+			Name    string `default:"gensch"`
+			Path    string `default:"/api"`
+			Version string `default:"v1"`
+			Origin  string `default:"*"`
+		}
 		Web struct {
 			Host            string        `default:"0.0.0.0:9999"`
 			ReadTimeout     time.Duration `default:"5s"`
@@ -37,10 +45,11 @@ func run(log *logger.Logger) error {
 		}
 		Rate struct {
 			Endpoint string `default:"https://api.coingecko.com/api/v3/exchange_rates"`
+			RetryMax int    `default:"10"`
 		}
-		Email struct {
-			SenderAddress string
-			SenderKey     string
+		Sender struct {
+			Address string
+			Key     string
 		}
 	}
 
@@ -48,22 +57,21 @@ func run(log *logger.Logger) error {
 		return fmt.Errorf("parsing config: %w", err)
 	}
 
-	log.Infow("Starting service")
+	log.Infow("starting service")
 
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
-	api := transport.New(
-		transport.Config{
-			DBPath:       cfg.Repo.Data,
-			EmailAPIkey:  cfg.Email.SenderKey,
-			EmailAddress: cfg.Email.SenderAddress,
-			RateEndpoint: cfg.Rate.Endpoint,
-		}, log)
+	app := api.New(api.ConfigAggregate{
+		Config: api.Config(cfg.Api),
+		Rate:   rate.ProviderConfig(cfg.Rate),
+		Sender: subscription.SenderConfig(cfg.Sender),
+		Repo:   subscription.RepoConfig(cfg.Repo),
+	}, shutdown, log)
 
 	srv := http.Server{
 		Addr:         cfg.Web.Host,
-		Handler:      api.Handle(),
+		Handler:      app.Handler(),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 		IdleTimeout:  cfg.Web.IdleTimeout,
@@ -72,7 +80,7 @@ func run(log *logger.Logger) error {
 
 	errSrv := make(chan error, 1)
 	go func() {
-		log.Infow("Startup", "status", "api router started", "host", srv.Addr)
+		log.Infow("startup", "status", "api router started", "host", srv.Addr)
 		errSrv <- srv.ListenAndServe()
 	}()
 
@@ -81,7 +89,7 @@ func run(log *logger.Logger) error {
 		return fmt.Errorf("server error: %w", err)
 
 	case sig := <-shutdown:
-		log.Infow("Shutdown", "status", "shutdown started", "signal", sig)
+		log.Infow("shutdown", "status", "shutdown started", "signal", sig)
 		defer log.Infow("Shutdown", "status", "shutdown complete", "signal", sig)
 
 		ctx, cancel := context.WithTimeout(context.Background(), cfg.Web.ShutdownTimeout)

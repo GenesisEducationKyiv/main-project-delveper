@@ -4,79 +4,88 @@
 package mock
 
 import (
+	"context"
 	"github.com/GenesisEducationKyiv/main-project-delveper/internal/subscription"
 	"sync"
 )
 
-// Ensure, that EmailRepositoryMock does implement subscription.EmailRepository.
+// Ensure, that SubscriberRepositoryMock does implement subscription.SubscriberRepository.
 // If this is not the case, regenerate this file with moq.
-var _ subscription.EmailRepository = &EmailRepositoryMock{}
+var _ subscription.SubscriberRepository = &SubscriberRepositoryMock{}
 
-// EmailRepositoryMock is a mock implementation of subscription.EmailRepository.
+// SubscriberRepositoryMock is a mock implementation of subscription.SubscriberRepository.
 //
-//	func TestSomethingThatUsesEmailRepository(t *testing.T) {
+//	func TestSomethingThatUsesSubscriberRepository(t *testing.T) {
 //
-//		// make and configure a mocked subscription.EmailRepository
-//		mockedEmailRepository := &EmailRepositoryMock{
-//			AddFunc: func(email subscription.Email) error {
+//		// make and configure a mocked subscription.SubscriberRepository
+//		mockedSubscriberRepository := &SubscriberRepositoryMock{
+//			AddFunc: func(contextMoqParam context.Context, subscriber subscription.Subscriber) error {
 //				panic("mock out the Add method")
 //			},
-//			GetAllFunc: func() ([]subscription.Email, error) {
-//				panic("mock out the GetAll method")
+//			ListFunc: func(contextMoqParam context.Context) ([]subscription.Subscriber, error) {
+//				panic("mock out the List method")
 //			},
 //		}
 //
-//		// use mockedEmailRepository in code that requires subscription.EmailRepository
+//		// use mockedSubscriberRepository in code that requires subscription.SubscriberRepository
 //		// and then make assertions.
 //
 //	}
-type EmailRepositoryMock struct {
+type SubscriberRepositoryMock struct {
 	// AddFunc mocks the Add method.
-	AddFunc func(email subscription.Email) error
+	AddFunc func(contextMoqParam context.Context, subscriber subscription.Subscriber) error
 
-	// GetAllFunc mocks the GetAll method.
-	GetAllFunc func() ([]subscription.Email, error)
+	// ListFunc mocks the List method.
+	ListFunc func(contextMoqParam context.Context) ([]subscription.Subscriber, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Add holds details about calls to the Add method.
 		Add []struct {
-			// Email is the email argument value.
-			Email subscription.Email
+			// ContextMoqParam is the contextMoqParam argument value.
+			ContextMoqParam context.Context
+			// Subscriber is the subscriber argument value.
+			Subscriber subscription.Subscriber
 		}
-		// GetAll holds details about calls to the GetAll method.
-		GetAll []struct {
+		// List holds details about calls to the List method.
+		List []struct {
+			// ContextMoqParam is the contextMoqParam argument value.
+			ContextMoqParam context.Context
 		}
 	}
-	lockAdd    sync.RWMutex
-	lockGetAll sync.RWMutex
+	lockAdd  sync.RWMutex
+	lockList sync.RWMutex
 }
 
 // Add calls AddFunc.
-func (mock *EmailRepositoryMock) Add(email subscription.Email) error {
+func (mock *SubscriberRepositoryMock) Add(contextMoqParam context.Context, subscriber subscription.Subscriber) error {
 	if mock.AddFunc == nil {
-		panic("EmailRepositoryMock.AddFunc: method is nil but EmailRepository.Add was just called")
+		panic("SubscriberRepositoryMock.AddFunc: method is nil but SubscriberRepository.Add was just called")
 	}
 	callInfo := struct {
-		Email subscription.Email
+		ContextMoqParam context.Context
+		Subscriber      subscription.Subscriber
 	}{
-		Email: email,
+		ContextMoqParam: contextMoqParam,
+		Subscriber:      subscriber,
 	}
 	mock.lockAdd.Lock()
 	mock.calls.Add = append(mock.calls.Add, callInfo)
 	mock.lockAdd.Unlock()
-	return mock.AddFunc(email)
+	return mock.AddFunc(contextMoqParam, subscriber)
 }
 
 // AddCalls gets all the calls that were made to Add.
 // Check the length with:
 //
-//	len(mockedEmailRepository.AddCalls())
-func (mock *EmailRepositoryMock) AddCalls() []struct {
-	Email subscription.Email
+//	len(mockedSubscriberRepository.AddCalls())
+func (mock *SubscriberRepositoryMock) AddCalls() []struct {
+	ContextMoqParam context.Context
+	Subscriber      subscription.Subscriber
 } {
 	var calls []struct {
-		Email subscription.Email
+		ContextMoqParam context.Context
+		Subscriber      subscription.Subscriber
 	}
 	mock.lockAdd.RLock()
 	calls = mock.calls.Add
@@ -84,29 +93,34 @@ func (mock *EmailRepositoryMock) AddCalls() []struct {
 	return calls
 }
 
-// GetAll calls GetAllFunc.
-func (mock *EmailRepositoryMock) GetAll() ([]subscription.Email, error) {
-	if mock.GetAllFunc == nil {
-		panic("EmailRepositoryMock.GetAllFunc: method is nil but EmailRepository.GetAll was just called")
+// List calls ListFunc.
+func (mock *SubscriberRepositoryMock) List(contextMoqParam context.Context) ([]subscription.Subscriber, error) {
+	if mock.ListFunc == nil {
+		panic("SubscriberRepositoryMock.ListFunc: method is nil but SubscriberRepository.List was just called")
 	}
 	callInfo := struct {
-	}{}
-	mock.lockGetAll.Lock()
-	mock.calls.GetAll = append(mock.calls.GetAll, callInfo)
-	mock.lockGetAll.Unlock()
-	return mock.GetAllFunc()
+		ContextMoqParam context.Context
+	}{
+		ContextMoqParam: contextMoqParam,
+	}
+	mock.lockList.Lock()
+	mock.calls.List = append(mock.calls.List, callInfo)
+	mock.lockList.Unlock()
+	return mock.ListFunc(contextMoqParam)
 }
 
-// GetAllCalls gets all the calls that were made to GetAll.
+// ListCalls gets all the calls that were made to List.
 // Check the length with:
 //
-//	len(mockedEmailRepository.GetAllCalls())
-func (mock *EmailRepositoryMock) GetAllCalls() []struct {
+//	len(mockedSubscriberRepository.ListCalls())
+func (mock *SubscriberRepositoryMock) ListCalls() []struct {
+	ContextMoqParam context.Context
 } {
 	var calls []struct {
+		ContextMoqParam context.Context
 	}
-	mock.lockGetAll.RLock()
-	calls = mock.calls.GetAll
-	mock.lockGetAll.RUnlock()
+	mock.lockList.RLock()
+	calls = mock.calls.List
+	mock.lockList.RUnlock()
 	return calls
 }

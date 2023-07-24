@@ -1,5 +1,5 @@
 // Package subscription provides functionality to manage subscriptions.
-package subscription
+package subs
 
 import (
 	"context"
@@ -8,10 +8,15 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/GenesisEducationKyiv/main-project-delveper/internal/rate"
+	"github.com/GenesisEducationKyiv/main-project-delveper/sys/event"
 )
 
-const defaultTimeout = 5 * time.Second
+const defaultTimeout = 15 * time.Second
+
+const (
+	currencyBTC = "BTC"
+	currencyUAH = "UAH"
+)
 
 var (
 	// ErrEmailAlreadyExists is an error indicating that the email address already exists in the database.
@@ -32,7 +37,14 @@ func NewSubscriber(address *mail.Address, topic Topic) *Subscriber {
 }
 
 // Topic represents a topic that subscribes to emails.
-type Topic = string
+type Topic struct {
+	BaseCurrency  string
+	QuoteCurrency string
+}
+
+func NewTopic(base, quote string) Topic {
+	return Topic{BaseCurrency: base, QuoteCurrency: quote}
+}
 
 // Message represents an email message.
 type Message struct {
@@ -67,26 +79,22 @@ type EmailSender interface {
 
 // Service represents a service that manages email subscriptions and sends emails.
 type Service struct {
-	rate rate.ExchangeRateService
+	bus  *event.Bus
 	repo SubscriberRepository
 	mail EmailSender
 }
 
 // NewService creates a new Service instance with the provided dependencies.
-func NewService(repo SubscriberRepository, rate rate.ExchangeRateService, mail EmailSender) *Service {
+func NewService(bus *event.Bus, repo SubscriberRepository, mail EmailSender) *Service {
 	return &Service{
+		bus:  bus,
 		repo: repo,
-		rate: rate,
 		mail: mail,
 	}
 }
 
 // Subscribe adds a new email subscription to the repository.
 func (svc *Service) Subscribe(ctx context.Context, sub Subscriber) error {
-	if sub.Topic == "" {
-		sub.Topic = rate.NewCurrencyPair(rate.CurrencyBTC, rate.CurrencyUAH).String()
-	}
-
 	if err := svc.repo.Add(ctx, sub); err != nil {
 		return fmt.Errorf("adding subscription: %w", err)
 	}
@@ -96,22 +104,24 @@ func (svc *Service) Subscribe(ctx context.Context, sub Subscriber) error {
 
 // SendEmails sends emails to all subscribers using the current rate.
 func (svc *Service) SendEmails(ctx context.Context) error {
-	pair := rate.NewCurrencyPair(rate.CurrencyBTC, rate.CurrencyUAH)
-
-	rate, err := svc.rate.Get(ctx, pair)
-	if err != nil {
-		return err
-	}
-
 	subscribers, err := svc.repo.List(ctx)
 	if err != nil {
 		return err
 	}
 
-	subject := fmt.Sprintf("%s exchange rate at %s", pair, time.Now().Format(time.Stamp))
-	body := fmt.Sprintf("Current exhange rate: %f", rate.Value)
+	// TODO: Improve the logic of retrieving exchange rate for distinct topics.
+	topic := subscribers[0].Topic
+
+	val, err := svc.RequestExchangeRate(ctx, topic)
+	if err != nil {
+		return err
+	}
 
 	var errArr []error
+
+	// TODO: Improve building message body.
+	subject := fmt.Sprintf("%s exchange rate at %s", topic, time.Now().Format(time.Stamp))
+	body := fmt.Sprintf("Current exhange rate: %f", val)
 
 	for _, sub := range subscribers {
 		msg := NewMessage(

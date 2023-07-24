@@ -19,8 +19,8 @@ var _ rate.ExchangeRateService = &ExchangeRateServiceMock{}
 //
 //		// make and configure a mocked rate.ExchangeRateService
 //		mockedExchangeRateService := &ExchangeRateServiceMock{
-//			GetFunc: func(ctx context.Context, currency rate.CurrencyPair) (*rate.ExchangeRate, error) {
-//				panic("mock out the Get method")
+//			GetExchangeRateFunc: func(ctx context.Context, currency rate.CurrencyPair) (*rate.ExchangeRate, error) {
+//				panic("mock out the GetExchangeRate method")
 //			},
 //		}
 //
@@ -29,26 +29,26 @@ var _ rate.ExchangeRateService = &ExchangeRateServiceMock{}
 //
 //	}
 type ExchangeRateServiceMock struct {
-	// GetFunc mocks the Get method.
-	GetFunc func(ctx context.Context, currency rate.CurrencyPair) (*rate.ExchangeRate, error)
+	// GetExchangeRateFunc mocks the GetExchangeRate method.
+	GetExchangeRateFunc func(ctx context.Context, currency rate.CurrencyPair) (*rate.ExchangeRate, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Get holds details about calls to the Get method.
-		Get []struct {
+		// GetExchangeRate holds details about calls to the GetExchangeRate method.
+		GetExchangeRate []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Currency is the currency argument value.
 			Currency rate.CurrencyPair
 		}
 	}
-	lockGet sync.RWMutex
+	lockGetExchangeRate sync.RWMutex
 }
 
-// Get calls GetFunc.
-func (mock *ExchangeRateServiceMock) Get(ctx context.Context, currency rate.CurrencyPair) (*rate.ExchangeRate, error) {
-	if mock.GetFunc == nil {
-		panic("ExchangeRateServiceMock.GetFunc: method is nil but ExchangeRateService.Get was just called")
+// GetExchangeRate calls GetExchangeRateFunc.
+func (mock *ExchangeRateServiceMock) GetExchangeRate(ctx context.Context, currency rate.CurrencyPair) (*rate.ExchangeRate, error) {
+	if mock.GetExchangeRateFunc == nil {
+		panic("ExchangeRateServiceMock.GetExchangeRateFunc: method is nil but ExchangeRateService.GetExchangeRate was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
@@ -57,17 +57,17 @@ func (mock *ExchangeRateServiceMock) Get(ctx context.Context, currency rate.Curr
 		Ctx:      ctx,
 		Currency: currency,
 	}
-	mock.lockGet.Lock()
-	mock.calls.Get = append(mock.calls.Get, callInfo)
-	mock.lockGet.Unlock()
-	return mock.GetFunc(ctx, currency)
+	mock.lockGetExchangeRate.Lock()
+	mock.calls.GetExchangeRate = append(mock.calls.GetExchangeRate, callInfo)
+	mock.lockGetExchangeRate.Unlock()
+	return mock.GetExchangeRateFunc(ctx, currency)
 }
 
-// GetCalls gets all the calls that were made to Get.
+// GetExchangeRateCalls gets all the calls that were made to GetExchangeRate.
 // Check the length with:
 //
-//	len(mockedExchangeRateService.GetCalls())
-func (mock *ExchangeRateServiceMock) GetCalls() []struct {
+//	len(mockedExchangeRateService.GetExchangeRateCalls())
+func (mock *ExchangeRateServiceMock) GetExchangeRateCalls() []struct {
 	Ctx      context.Context
 	Currency rate.CurrencyPair
 } {
@@ -75,8 +75,8 @@ func (mock *ExchangeRateServiceMock) GetCalls() []struct {
 		Ctx      context.Context
 		Currency rate.CurrencyPair
 	}
-	mock.lockGet.RLock()
-	calls = mock.calls.Get
-	mock.lockGet.RUnlock()
+	mock.lockGetExchangeRate.RLock()
+	calls = mock.calls.GetExchangeRate
+	mock.lockGetExchangeRate.RUnlock()
 	return calls
 }

@@ -5,29 +5,29 @@ package mock
 
 import (
 	"context"
-	"github.com/GenesisEducationKyiv/main-project-delveper/internal/subscription"
+	"github.com/GenesisEducationKyiv/main-project-delveper/internal/subs"
 	"sync"
 )
 
-// Ensure, that SubscriptionServiceMock does implement subscription.SubscriptionService.
+// Ensure, that SubscriptionServiceMock does implement subs.SubscriptionService.
 // If this is not the case, regenerate this file with moq.
-var _ subscription.SubscriptionService = &SubscriptionServiceMock{}
+var _ subs.SubscriptionService = &SubscriptionServiceMock{}
 
-// SubscriptionServiceMock is a mock implementation of subscription.SubscriptionService.
+// SubscriptionServiceMock is a mock implementation of subs.SubscriptionService.
 //
 //	func TestSomethingThatUsesSubscriptionService(t *testing.T) {
 //
-//		// make and configure a mocked subscription.SubscriptionService
+//		// make and configure a mocked subs.SubscriptionService
 //		mockedSubscriptionService := &SubscriptionServiceMock{
 //			SendEmailsFunc: func(contextMoqParam context.Context) error {
 //				panic("mock out the SendEmails method")
 //			},
-//			SubscribeFunc: func(contextMoqParam context.Context, subscriber subscription.Subscriber) error {
+//			SubscribeFunc: func(contextMoqParam context.Context, subscriber subs.Subscriber) error {
 //				panic("mock out the Subscribe method")
 //			},
 //		}
 //
-//		// use mockedSubscriptionService in code that requires subscription.SubscriptionService
+//		// use mockedSubscriptionService in code that requires subs.SubscriptionService
 //		// and then make assertions.
 //
 //	}
@@ -36,7 +36,7 @@ type SubscriptionServiceMock struct {
 	SendEmailsFunc func(contextMoqParam context.Context) error
 
 	// SubscribeFunc mocks the Subscribe method.
-	SubscribeFunc func(contextMoqParam context.Context, subscriber subscription.Subscriber) error
+	SubscribeFunc func(contextMoqParam context.Context, subscriber subs.Subscriber) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -50,7 +50,7 @@ type SubscriptionServiceMock struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
 			// Subscriber is the subscriber argument value.
-			Subscriber subscription.Subscriber
+			Subscriber subs.Subscriber
 		}
 	}
 	lockSendEmails sync.RWMutex
@@ -90,13 +90,13 @@ func (mock *SubscriptionServiceMock) SendEmailsCalls() []struct {
 }
 
 // Subscribe calls SubscribeFunc.
-func (mock *SubscriptionServiceMock) Subscribe(contextMoqParam context.Context, subscriber subscription.Subscriber) error {
+func (mock *SubscriptionServiceMock) Subscribe(contextMoqParam context.Context, subscriber subs.Subscriber) error {
 	if mock.SubscribeFunc == nil {
 		panic("SubscriptionServiceMock.SubscribeFunc: method is nil but SubscriptionService.Subscribe was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
-		Subscriber      subscription.Subscriber
+		Subscriber      subs.Subscriber
 	}{
 		ContextMoqParam: contextMoqParam,
 		Subscriber:      subscriber,
@@ -113,11 +113,11 @@ func (mock *SubscriptionServiceMock) Subscribe(contextMoqParam context.Context, 
 //	len(mockedSubscriptionService.SubscribeCalls())
 func (mock *SubscriptionServiceMock) SubscribeCalls() []struct {
 	ContextMoqParam context.Context
-	Subscriber      subscription.Subscriber
+	Subscriber      subs.Subscriber
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
-		Subscriber      subscription.Subscriber
+		Subscriber      subs.Subscriber
 	}
 	mock.lockSubscribe.RLock()
 	calls = mock.calls.Subscribe

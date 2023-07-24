@@ -5,38 +5,38 @@ package mock
 
 import (
 	"context"
-	"github.com/GenesisEducationKyiv/main-project-delveper/internal/subscription"
+	"github.com/GenesisEducationKyiv/main-project-delveper/internal/subs"
 	"sync"
 )
 
-// Ensure, that SubscriberRepositoryMock does implement subscription.SubscriberRepository.
+// Ensure, that SubscriberRepositoryMock does implement subs.SubscriberRepository.
 // If this is not the case, regenerate this file with moq.
-var _ subscription.SubscriberRepository = &SubscriberRepositoryMock{}
+var _ subs.SubscriberRepository = &SubscriberRepositoryMock{}
 
-// SubscriberRepositoryMock is a mock implementation of subscription.SubscriberRepository.
+// SubscriberRepositoryMock is a mock implementation of subs.SubscriberRepository.
 //
 //	func TestSomethingThatUsesSubscriberRepository(t *testing.T) {
 //
-//		// make and configure a mocked subscription.SubscriberRepository
+//		// make and configure a mocked subs.SubscriberRepository
 //		mockedSubscriberRepository := &SubscriberRepositoryMock{
-//			AddFunc: func(contextMoqParam context.Context, subscriber subscription.Subscriber) error {
+//			AddFunc: func(contextMoqParam context.Context, subscriber subs.Subscriber) error {
 //				panic("mock out the Add method")
 //			},
-//			ListFunc: func(contextMoqParam context.Context) ([]subscription.Subscriber, error) {
+//			ListFunc: func(contextMoqParam context.Context) ([]subs.Subscriber, error) {
 //				panic("mock out the List method")
 //			},
 //		}
 //
-//		// use mockedSubscriberRepository in code that requires subscription.SubscriberRepository
+//		// use mockedSubscriberRepository in code that requires subs.SubscriberRepository
 //		// and then make assertions.
 //
 //	}
 type SubscriberRepositoryMock struct {
 	// AddFunc mocks the Add method.
-	AddFunc func(contextMoqParam context.Context, subscriber subscription.Subscriber) error
+	AddFunc func(contextMoqParam context.Context, subscriber subs.Subscriber) error
 
 	// ListFunc mocks the List method.
-	ListFunc func(contextMoqParam context.Context) ([]subscription.Subscriber, error)
+	ListFunc func(contextMoqParam context.Context) ([]subs.Subscriber, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -45,7 +45,7 @@ type SubscriberRepositoryMock struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
 			// Subscriber is the subscriber argument value.
-			Subscriber subscription.Subscriber
+			Subscriber subs.Subscriber
 		}
 		// List holds details about calls to the List method.
 		List []struct {
@@ -58,13 +58,13 @@ type SubscriberRepositoryMock struct {
 }
 
 // Add calls AddFunc.
-func (mock *SubscriberRepositoryMock) Add(contextMoqParam context.Context, subscriber subscription.Subscriber) error {
+func (mock *SubscriberRepositoryMock) Add(contextMoqParam context.Context, subscriber subs.Subscriber) error {
 	if mock.AddFunc == nil {
 		panic("SubscriberRepositoryMock.AddFunc: method is nil but SubscriberRepository.Add was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
-		Subscriber      subscription.Subscriber
+		Subscriber      subs.Subscriber
 	}{
 		ContextMoqParam: contextMoqParam,
 		Subscriber:      subscriber,
@@ -81,11 +81,11 @@ func (mock *SubscriberRepositoryMock) Add(contextMoqParam context.Context, subsc
 //	len(mockedSubscriberRepository.AddCalls())
 func (mock *SubscriberRepositoryMock) AddCalls() []struct {
 	ContextMoqParam context.Context
-	Subscriber      subscription.Subscriber
+	Subscriber      subs.Subscriber
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
-		Subscriber      subscription.Subscriber
+		Subscriber      subs.Subscriber
 	}
 	mock.lockAdd.RLock()
 	calls = mock.calls.Add
@@ -94,7 +94,7 @@ func (mock *SubscriberRepositoryMock) AddCalls() []struct {
 }
 
 // List calls ListFunc.
-func (mock *SubscriberRepositoryMock) List(contextMoqParam context.Context) ([]subscription.Subscriber, error) {
+func (mock *SubscriberRepositoryMock) List(contextMoqParam context.Context) ([]subs.Subscriber, error) {
 	if mock.ListFunc == nil {
 		panic("SubscriberRepositoryMock.ListFunc: method is nil but SubscriberRepository.List was just called")
 	}

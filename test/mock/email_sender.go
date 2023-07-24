@@ -4,51 +4,51 @@
 package mock
 
 import (
-	"github.com/GenesisEducationKyiv/main-project-delveper/internal/subscription"
+	"github.com/GenesisEducationKyiv/main-project-delveper/internal/subs"
 	"sync"
 )
 
-// Ensure, that EmailSenderMock does implement subscription.EmailSender.
+// Ensure, that EmailSenderMock does implement subs.EmailSender.
 // If this is not the case, regenerate this file with moq.
-var _ subscription.EmailSender = &EmailSenderMock{}
+var _ subs.EmailSender = &EmailSenderMock{}
 
-// EmailSenderMock is a mock implementation of subscription.EmailSender.
+// EmailSenderMock is a mock implementation of subs.EmailSender.
 //
 //	func TestSomethingThatUsesEmailSender(t *testing.T) {
 //
-//		// make and configure a mocked subscription.EmailSender
+//		// make and configure a mocked subs.EmailSender
 //		mockedEmailSender := &EmailSenderMock{
-//			SendFunc: func(message subscription.Message) error {
+//			SendFunc: func(message subs.Message) error {
 //				panic("mock out the Send method")
 //			},
 //		}
 //
-//		// use mockedEmailSender in code that requires subscription.EmailSender
+//		// use mockedEmailSender in code that requires subs.EmailSender
 //		// and then make assertions.
 //
 //	}
 type EmailSenderMock struct {
 	// SendFunc mocks the Send method.
-	SendFunc func(message subscription.Message) error
+	SendFunc func(message subs.Message) error
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Send holds details about calls to the Send method.
 		Send []struct {
 			// Message is the message argument value.
-			Message subscription.Message
+			Message subs.Message
 		}
 	}
 	lockSend sync.RWMutex
 }
 
 // Send calls SendFunc.
-func (mock *EmailSenderMock) Send(message subscription.Message) error {
+func (mock *EmailSenderMock) Send(message subs.Message) error {
 	if mock.SendFunc == nil {
 		panic("EmailSenderMock.SendFunc: method is nil but EmailSender.Send was just called")
 	}
 	callInfo := struct {
-		Message subscription.Message
+		Message subs.Message
 	}{
 		Message: message,
 	}
@@ -63,10 +63,10 @@ func (mock *EmailSenderMock) Send(message subscription.Message) error {
 //
 //	len(mockedEmailSender.SendCalls())
 func (mock *EmailSenderMock) SendCalls() []struct {
-	Message subscription.Message
+	Message subs.Message
 } {
 	var calls []struct {
-		Message subscription.Message
+		Message subs.Message
 	}
 	mock.lockSend.RLock()
 	calls = mock.calls.Send

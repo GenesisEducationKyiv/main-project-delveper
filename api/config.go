@@ -2,15 +2,14 @@ package api
 
 import (
 	"github.com/GenesisEducationKyiv/main-project-delveper/internal/rate"
-	"github.com/GenesisEducationKyiv/main-project-delveper/internal/subscription"
+	"github.com/GenesisEducationKyiv/main-project-delveper/internal/subs"
 )
 
 // ConfigAggregate struct holds all necessary app configuration parameters.
 type ConfigAggregate struct {
-	Config Config
-	Rate   rate.ProviderConfig
-	Sender subscription.SenderConfig
-	Repo   subscription.RepoConfig
+	Api          Config
+	Rate         rate.Config
+	Subscription subs.Config
 }
 
 type Config struct {

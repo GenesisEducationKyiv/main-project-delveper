@@ -1,4 +1,4 @@
-package subscription
+package subs
 
 import (
 	"context"
@@ -14,14 +14,14 @@ import (
 )
 
 func TestRepoIntegration(t *testing.T) {
-	t.Run("Get none", func(t *testing.T) {
+	t.Run("GetExchangeRate none", func(t *testing.T) {
 		repo, teardown := testSetupRepo(t)
 		defer teardown()
 
 		testGetAll(t, repo, os.ErrNotExist)
 	})
 
-	t.Run("Add and get many", func(t *testing.T) {
+	t.Run("Publish and get many", func(t *testing.T) {
 		repo, teardown := testSetupRepo(t)
 		defer teardown()
 
@@ -35,7 +35,7 @@ func TestRepoIntegration(t *testing.T) {
 		testGetAll(t, repo, nil, emails...)
 	})
 
-	t.Run("Add and get many, add duplicate and get many, add duplicate", func(t *testing.T) {
+	t.Run("Publish and get many, add duplicate and get many, add duplicate", func(t *testing.T) {
 		repo, teardown := testSetupRepo(t)
 		defer teardown()
 
@@ -54,7 +54,7 @@ func TestRepoIntegration(t *testing.T) {
 		testAdd(t, repo, os.ErrExist, emails[0])
 	})
 
-	t.Run("Add one and get one, add duplicate and get one", func(t *testing.T) {
+	t.Run("Publish one and get one, add duplicate and get one", func(t *testing.T) {
 		repo, teardown := testSetupRepo(t)
 		defer teardown()
 
@@ -67,7 +67,7 @@ func TestRepoIntegration(t *testing.T) {
 		testGetAll(t, repo, nil, email)
 	})
 
-	t.Run("Add and get whole lot, get whole lot again, add duplicates randomly", func(t *testing.T) {
+	t.Run("Publish and get whole lot, get whole lot again, add duplicates randomly", func(t *testing.T) {
 		repo, teardown := testSetupRepo(t)
 		defer teardown()
 

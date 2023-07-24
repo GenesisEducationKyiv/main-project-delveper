@@ -1,4 +1,9 @@
-package subscription
+package subs
+
+type Config struct {
+	Sender SenderConfig
+	Repo   RepoConfig
+}
 
 type SenderConfig struct {
 	Address string

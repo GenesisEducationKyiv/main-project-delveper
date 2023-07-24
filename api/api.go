@@ -27,7 +27,7 @@ type Route func(*App)
 func New(cfg ConfigAggregate, sig chan os.Signal, log *logger.Logger) *App {
 	mws := []web.Middleware{
 		web.WithLogRequest(log),
-		web.WithCORS(cfg.Config.Origin),
+		web.WithCORS(cfg.Api.Origin),
 		web.WithErrors(log),
 		web.WithJSON,
 		web.WithRecover(log),

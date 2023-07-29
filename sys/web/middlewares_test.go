@@ -59,7 +59,7 @@ func TestChainMiddlewares(t *testing.T) {
 }
 
 func TestMiddlewares(t *testing.T) {
-	log := logger.New(logger.LevelDebug, "../../log/test.log")
+	log := logger.New(logger.WithConsoleCore(logger.LevelDebug))
 	defer log.Sync()
 
 	const target = "http://example.com/foo/bar"
@@ -138,6 +138,6 @@ func TestMiddlewares(t *testing.T) {
 		err := mw(context.Background(), rw, req)
 
 		require.NoError(t, err)
-		require.JSONEq(t, `{"error":"Internal Server Error"}`, rw.Body.String())
+		require.JSONEq(t, `{"error":"unknown error"}`, rw.Body.String())
 	})
 }

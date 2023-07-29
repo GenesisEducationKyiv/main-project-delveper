@@ -1,7 +1,7 @@
 /*
-Package api provides the main App server for the application.
-It includes functions for creating new App instances, handling incoming
-HTTP requests, adding middlewares and applying various application routes.
+Package api can be seen as the Controller layer that responsible for handling incoming HTTP requests,
+applying the necessary middlewares, and delegating the requests to the appropriate handlers (Use Case Interactors).
+The handlers then interact with the domain logic to process the request and generate a response.
 */
 package api
 
@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/GenesisEducationKyiv/main-project-delveper/sys/event"
 	"github.com/GenesisEducationKyiv/main-project-delveper/sys/logger"
 	"github.com/GenesisEducationKyiv/main-project-delveper/sys/web"
 )
@@ -18,13 +19,14 @@ type App struct {
 	sig chan os.Signal
 	log *logger.Logger
 	web *web.Web
+	bus *event.Bus
 }
 
 // Route is a function that defines an application route.
-type Route func(*App)
+type Route func(*App) error
 
 // New returns a new App instance with provided configuration.
-func New(cfg ConfigAggregate, sig chan os.Signal, log *logger.Logger) *App {
+func New(cfg ConfigAggregate, sig chan os.Signal, log *logger.Logger) (*App, error) {
 	mws := []web.Middleware{
 		web.WithLogRequest(log),
 		web.WithCORS(cfg.Api.Origin),
@@ -33,29 +35,38 @@ func New(cfg ConfigAggregate, sig chan os.Signal, log *logger.Logger) *App {
 		web.WithRecover(log),
 	}
 
-	web := web.New(sig, mws...)
-
 	api := App{
 		sig: sig,
 		log: log,
-		web: web,
+		web: web.New(sig, mws...),
+		bus: event.NewBus(log),
 	}
 
-	api.Routes(
+	err := api.Routes(
 		WithRate(cfg),
 		WithSubscription(cfg),
+		WithNotification(cfg),
 	)
 
-	return &api
+	if err != nil {
+		return nil, err
+	}
+
+	return &api, nil
 }
 
+// Handler returns the web handler.
 func (a *App) Handler() http.Handler {
 	return a.web
 }
 
 // Routes applies all application routes.
-func (a *App) Routes(routes ...Route) {
+func (a *App) Routes(routes ...Route) error {
 	for i := range routes {
-		routes[i](a)
+		if err := routes[i](a); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }

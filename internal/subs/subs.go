@@ -1,11 +1,12 @@
-// Package subscription provides functionality to manage subscriptions.
+/*
+Package subs provides functionality to manage subscriptions.
+*/
 package subs
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"net/mail"
 	"time"
 
 	"github.com/GenesisEducationKyiv/main-project-delveper/sys/event"
@@ -19,125 +20,69 @@ const (
 )
 
 var (
-	// ErrEmailAlreadyExists is an error indicating that the email address already exists in the database.
-	ErrEmailAlreadyExists = errors.New("email address exists")
+	// ErrSubscriptionExists is an error indicating that the email address already exists in the database.
+	ErrSubscriptionExists = errors.New("subscription already exists")
 
 	// ErrMissingEmail is an error indicating that the email address is missing.
 	ErrMissingEmail = errors.New("missing email")
+
+	// ErrNotFound is an error indicating that the subscription was not found in the database.
+	ErrNotFound = errors.New("subscription not found")
 )
-
-// Subscriber represents an entity that subscribes to emails.
-type Subscriber struct {
-	Address *mail.Address
-	Topic   Topic
-}
-
-func NewSubscriber(address *mail.Address, topic Topic) *Subscriber {
-	return &Subscriber{Address: address, Topic: topic}
-}
-
-// Topic represents a topic that subscribes to emails.
-type Topic struct {
-	BaseCurrency  string
-	QuoteCurrency string
-}
-
-func NewTopic(base, quote string) Topic {
-	return Topic{BaseCurrency: base, QuoteCurrency: quote}
-}
-
-// Message represents an email message.
-type Message struct {
-	From    *mail.Address
-	To      *mail.Address
-	Subject string
-	Body    string
-}
-
-func NewMessage(subject, body string, to *mail.Address) Message {
-	return Message{
-		To:      to,
-		Subject: subject,
-		Body:    body,
-	}
-}
 
 //go:generate moq -out=../../test/mock/email_repository.go -pkg=mock . SubscriberRepository
 
 // SubscriberRepository is an interface for managing email subscriptions.
 type SubscriberRepository interface {
-	Add(context.Context, Subscriber) error
-	List(context.Context) ([]Subscriber, error)
-}
-
-//go:generate moq -out=../../test/mock/email_sender.go -pkg=mock . EmailSender
-
-// EmailSender is an interface for sending emails.
-type EmailSender interface {
-	Send(Message) error
+	Add(context.Context, Subscription) error
+	List(context.Context) ([]Subscription, error)
 }
 
 // Service represents a service that manages email subscriptions and sends emails.
 type Service struct {
 	bus  *event.Bus
 	repo SubscriberRepository
-	mail EmailSender
 }
 
 // NewService creates a new Service instance with the provided dependencies.
-func NewService(bus *event.Bus, repo SubscriberRepository, mail EmailSender) *Service {
-	return &Service{
+func NewService(bus *event.Bus, repo SubscriberRepository) *Service {
+	svc := Service{
 		bus:  bus,
 		repo: repo,
-		mail: mail,
 	}
+
+	svc.bus.Subscribe(event.New(EventSource, EventKindRequested, nil), svc.RespondSubscription)
+
+	return &svc
 }
 
 // Subscribe adds a new email subscription to the repository.
-func (svc *Service) Subscribe(ctx context.Context, sub Subscriber) error {
-	if err := svc.repo.Add(ctx, sub); err != nil {
+func (svc *Service) Subscribe(ctx context.Context, subs Subscription) error {
+	if err := svc.repo.Add(ctx, subs); err != nil {
 		return fmt.Errorf("adding subscription: %w", err)
 	}
-
+	// TODO: Add event for handling new subscription.
 	return nil
 }
 
-// SendEmails sends emails to all subscribers using the current rate.
-func (svc *Service) SendEmails(ctx context.Context) error {
-	subscribers, err := svc.repo.List(ctx)
+// List returns all subscriptions from the repository specified by topic.
+func (svc *Service) List(ctx context.Context, topic Topic) ([]Subscription, error) {
+	subscriptions, err := svc.repo.List(ctx)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("listing subscriptions: %w", err)
 	}
 
-	// TODO: Improve the logic of retrieving exchange rate for distinct topics.
-	topic := subscribers[0].Topic
-
-	val, err := svc.RequestExchangeRate(ctx, topic)
-	if err != nil {
-		return err
-	}
-
-	var errArr []error
-
-	// TODO: Improve building message body.
-	subject := fmt.Sprintf("%s exchange rate at %s", topic, time.Now().Format(time.Stamp))
-	body := fmt.Sprintf("Current exhange rate: %f", val)
-
-	for _, sub := range subscribers {
-		msg := NewMessage(
-			subject,
-			body,
-			sub.Address,
-		)
-
-		if err := svc.mail.Send(msg); err != nil {
-			errArr = append(errArr, err)
+	var n int
+	for _, subs := range subscriptions {
+		if subs.Topic == topic {
+			subscriptions[n] = subs
+			n++
 		}
 	}
 
-	if errArr != nil {
-		return errors.Join(errArr...)
+	if n == 0 {
+		return nil, fmt.Errorf("%w for topic %s", ErrNotFound, topic)
 	}
 
-	return nil
+	return subscriptions[:n], nil
 }

@@ -37,7 +37,9 @@ make docker-run
  ```  
 
 ## Module Tree
+
 --- TODO: Update
+
 ```
 📦xrate
  ┣ 📂.github
@@ -128,7 +130,7 @@ graph TB
     SubscriptionService -.->|impl| SubscriptionServiceInterface
     RateService -.->|impl| RateServiceInterface
     Client[Client] -->|interacts| HTTP
-    main-->|serves| HTTP
+    main -->|serves| HTTP
     subgraph Transport
         subgraph HTTP
             App((APP)) -->|binds| RateHandlers[Rate Handlers]
@@ -183,8 +185,11 @@ graph TB
         end
     end
 ```
-## Entities 
+
+## Entities
+
 --TODO: Finish
+
 ```mermaid
 classDiagram
     class App {
@@ -209,10 +214,15 @@ classDiagram
         Version string
         Origin string
     }
-    class Handler {
+    class RateHandler {
         <<struct>>
         rate ExchangeRateService
     }
+
+    class SubscriptionHandler {
+        subs SubscriptionService
+    }
+
     class ExchangeRateService {
         <<interface>>
         GetExchangeRate(ctx context.Context, currency CurrencyPair) (*ExchangeRate, error)
@@ -279,11 +289,12 @@ classDiagram
         <<struct>>
         *zap.SugaredLogger
     }
-    
-    
+
+
     App o-- Route
     App --> ConfigAggregate
     App --> Web
+    App --> Logger
     ConfigAggregate o-- Config
     ConfigAggregate o-- RateConfig
     ConfigAggregate o-- SubsConfig
@@ -295,5 +306,4 @@ classDiagram
     SubsConfig o-- SenderConfig
     SubsConfig o-- RepoConfig
     Repo o-- Storer
-    App --> Logger
 ```

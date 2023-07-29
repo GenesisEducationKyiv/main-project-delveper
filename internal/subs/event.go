@@ -9,70 +9,35 @@ import (
 )
 
 const (
-	EventSource          = "subs"
-	EventKindRateRequest = "rate_request"
+	EventSource        = "subs"
+	EventKindRequested = "requested"
+	EventKindResponded = "responded"
 )
 
 var ErrInvalidEvent = errors.New("invalid event")
 
-type RequestEvent interface {
-	BaseCurrency
-	QuoteCurrency
+type CurrencyPairEvent interface {
+	BaseCurrency() string
+	QuoteCurrency() string
 }
 
-type ResponseEvent interface {
-	ExchangeRate
-}
-
-// BaseCurrency represents a base currency fetcher.
-type BaseCurrency interface{ BaseCurrency() string }
-
-// QuoteCurrency represents a quote currency fetcher.
-type QuoteCurrency interface{ QuoteCurrency() string }
-
-type ExchangeRate interface{ ExchangeRate() float64 }
-
-// RequestEventData represents the data of a request event.
-type RequestEventData struct {
-	baseCurrency  string
-	quoteCurrency string
-}
-
-func toRequestEventData(t Topic) *RequestEventData {
-	return &RequestEventData{
-		baseCurrency:  t.BaseCurrency,
-		quoteCurrency: t.QuoteCurrency,
-	}
-}
-
-// BaseCurrency returns the base currency of the RequestEventData.
-func (rd *RequestEventData) BaseCurrency() string {
-	return rd.baseCurrency
-}
-
-// QuoteCurrency returns the quote currency of the RequestEventData.
-func (rd *RequestEventData) QuoteCurrency() string {
-	return rd.quoteCurrency
-}
-
-func (svc *Service) RequestExchangeRate(ctx context.Context, topic Topic) (float64, error) {
-	req := event.New(EventSource, EventKindRateRequest, toRequestEventData(topic))
-	ch := make(chan event.Event)
-	req.Response = ch
-
-	if err := svc.bus.Dispatch(ctx, req); err != nil {
-		return 0, err
+// RespondSubscription handles an event send subscriptions data.
+func (svc *Service) RespondSubscription(ctx context.Context, e event.Event) error {
+	req, ok := e.Payload.(CurrencyPairEvent)
+	if !ok {
+		return fmt.Errorf("%w: unexpected payload: %T", ErrInvalidEvent, e.Payload)
 	}
 
-	select {
-	case <-ctx.Done():
-		return 0, ctx.Err()
-	case e := <-ch:
-		resp, ok := e.Data.(ResponseEvent)
-		if !ok {
-			return 0, fmt.Errorf("%w: %T", ErrInvalidEvent, e)
-		}
-
-		return resp.ExchangeRate(), nil
+	subss, err := svc.List(ctx, NewTopic(req.BaseCurrency(), req.QuoteCurrency()))
+	if err != nil {
+		return fmt.Errorf("responding subscription event: %w", err)
 	}
+
+	if e.Response == nil {
+		return fmt.Errorf("responding exchange rate event: %w", ErrInvalidEvent)
+	}
+
+	e.Response <- event.New(EventSource, EventKindResponded, Subscriptions(subss))
+
+	return nil
 }

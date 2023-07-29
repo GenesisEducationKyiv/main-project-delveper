@@ -9,10 +9,8 @@ import (
 
 // Storer defines the interface for storing and retrieving subscribers.
 type Storer interface {
-	// Store TODO: Publish context.
-	Store(Subscriber) error
-	// FetchAll TODO: Publish context.
-	FetchAll() ([]Subscriber, error)
+	Store(Subscription) error
+	FetchAll() ([]Subscription, error)
 }
 
 // Repo is a repository that implements the Storer interface.
@@ -24,24 +22,24 @@ func NewRepo(fileStore Storer) *Repo {
 }
 
 // Add creates a new email subscription.
-func (s *Repo) Add(ctx context.Context, email Subscriber) error {
-	if err := s.Storer.Store(email); err != nil {
+func (r *Repo) Add(ctx context.Context, subs Subscription) error {
+	if err := r.Storer.Store(subs); err != nil {
 		if errors.Is(err, os.ErrExist) {
-			return ErrEmailAlreadyExists
+			return ErrSubscriptionExists
 		}
 
-		return fmt.Errorf("adding email subscription: %w", err)
+		return fmt.Errorf("adding subscription: %w", err)
 	}
 
 	return nil
 }
 
 // List retrieves all email subscriptions from the repository.
-func (s *Repo) List(ctx context.Context) ([]Subscriber, error) {
-	emails, err := s.Storer.FetchAll()
+func (r *Repo) List(ctx context.Context) ([]Subscription, error) {
+	subss, err := r.Storer.FetchAll()
 	if err != nil {
-		return nil, fmt.Errorf("getting all email subscriptions: %w", err)
+		return nil, fmt.Errorf("getting all subscriptions: %w", err)
 	}
 
-	return emails, nil
+	return subss, nil
 }

@@ -1,4 +1,5 @@
-# Genesis Software Engineering School 3.0
+# xrate 
+>Genesis Software Engineering School 3.0 project
 
 ## Description
 
@@ -23,13 +24,13 @@ Command line tool for consuming kafka logs.
 
 The application is divided into several key modules as detailed below:
 
-- **cmd**: Contains the application's entry point.
+- **app**: Contains the application's entry point with `ctrl` package which is use case controller responsible for binding all dependencies.
 - **data**: Contains file store, or raw data.
-- **docs**: Contains documentation files.
-- **internal**: Contains the core application logic divided into `rate`, `subscription`, and `transport` packages.
-- **scripts**: Contains auxiliary scripts for various tasks.
-- **sys**: Contains system-level packages like `env`, `filestore`, and `logger`.
-
+- **doc**: Contains openapi documentation.
+- **internal**: Contains the core application logic divided into `rate`, `subs`, and `notif` packages.
+- **script**: Contains auxiliary scripts for various tasks.
+- **sys**: Contains system-level packages like `env`, `web`, `filestore`, and `logger`.
+- **test**: contains test related data like a *postman* collection with Dockerfile and `mock` package.
 Each module is responsible for a specific function within the application, allowing for clear separation of concerns and
 making the codebase easy to manage and navigate.
 

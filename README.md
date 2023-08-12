@@ -29,7 +29,7 @@ The application is divided into several key modules as detailed below:
 - **doc**: Contains openapi documentation.
 - **internal**: Contains the core application logic divided into `rate`, `subs`, and `notif` packages.
 - **script**: Contains auxiliary scripts for various tasks.
-- **sys**: Contains system-level packages like `env`, `web`, `filestore`, and `logger`.
+- **sys**: Contains system-level packages like `env`,  `event`, `web`, `filestore`, and `logger`.
 - **test**: contains test related data like a *postman* collection with Dockerfile and `mock` package.
 Each module is responsible for a specific function within the application, allowing for clear separation of concerns and
 making the codebase easy to manage and navigate.

@@ -1,5 +1,20 @@
 # Genesis Software Engineering School 3.0
 
+## Description
+
+The **xrate** project solves the problem of providing a backend API for fetching currency exchange rates from base to
+quote currency pairs, which can be fiat or crypto.
+
+## Tooling
+
+### API
+
+The main service of the project.
+
+### Log consumer
+
+Command line tool for consuming kafka logs.
+
 ## Doc
 
 [openapi.yaml](doc%2Fopenapi.yaml)
@@ -36,85 +51,6 @@ make docker-build
 make docker-run
  ```  
 
-## Module Tree
-
---- TODO: Update
-
-```
-📦xrate
- ┣ 📂.github
- ┃ ┗ 📂workflows
- ┃   ┣ 📜go.yml
- ┃   ┗ 📜golangci.yml
- ┣ 📂api
- ┃ ┣ 📜api.go
- ┃ ┣ 📜config.go
- ┃ ┗ 📜routes.go
- ┣ 📂cmd
- ┃ ┗ 📜main.go
- ┣ 📂doc
- ┃ ┗ 📜openapi.yaml
- ┣ 📂internal
- ┃ ┣ 📂rate
- ┃ ┃ ┣ 📜config.go
- ┃ ┃ ┣ 📂curxrt
- ┃ ┃ ┃ ┣ 📜alphavantage.go
- ┃ ┃ ┃ ┣ 📜coinapi.go
- ┃ ┃ ┃ ┣ 📜coinyep.go
- ┃ ┃ ┃ ┣ 📜curxrt.go
- ┃ ┃ ┃ ┣ 📜ninjas.go
- ┃ ┃ ┃ ┗ 📜xratehost.go
- ┃ ┃ ┣ 📜event.go
- ┃ ┃ ┣ 📜handler.go
- ┃ ┃ ┗ 📜rate.go
- ┃ ┗ 📂subs
- ┃   ┣ 📜config.go
- ┃   ┣ 📜event.go
- ┃   ┣ 📜handler.go
- ┃   ┣ 📜repo.go
- ┃   ┣ 📜repo_test.go
- ┃   ┣ 📜sender.go
- ┃   ┗ 📜subs.go
- ┣ 📂log
- ┃ ┗ 📜sys.log
- ┣ 📂sys
- ┃ ┣ 📂env
- ┃ ┃ ┣ 📜env.go
- ┃ ┃ ┗ 📜env_test.go
- ┃ ┣ 📂event
- ┃ ┃ ┗ 📜event.go
- ┃ ┣ 📂filestore
- ┃ ┃ ┣ 📜filestore.go
- ┃ ┃ ┗ 📜filestore_test.go
- ┃ ┣ 📂logger
- ┃ ┃ ┗ 📜logger.go
- ┃ ┗ 📂web
- ┃   ┣ 📜errors.go
- ┃   ┣ 📜middlewares.go
- ┃   ┣ 📜middlewares_test.go
- ┃   ┣ 📜params.go
- ┃   ┣ 📜request.go
- ┃   ┣ 📜respond.go
- ┃   ┗ 📜web.go
- ┣ 📂test
- ┃ ┣ 📂mock
- ┃ ┃ ┣ 📜email_repository.go
- ┃ ┃ ┣ 📜email_sender.go
- ┃ ┃ ┣ 📜getter.go
- ┃ ┃ ┗ 📜subscriber.go
- ┃ ┣ 📜Dockerfile
- ┃ ┗ 📜postman.json
- ┣ 📜.gitignore
- ┣ 📜.golangci.yml
- ┣ 📜Dockerfile
- ┣ 📜Makefile
- ┣ 📜README.md
- ┣ 📜docker-compose.yml
- ┣ 📜go.mod
- ┗ 📜go.sum
-
-```
-
 ## Architecture
 
 ```mermaid
@@ -129,7 +65,7 @@ graph TB
     NotificationAdapters -.->|impl| EmailSender
     SubscriptionService -.->|impl| SubscriptionServiceInterface
     RateService -.->|impl| RateServiceInterface
-    NotificationService -.->|impl|NotificationServiceInterface
+    NotificationService -.->|impl| NotificationServiceInterface
     Client[Client] -->|interacts| HTTP
     main -->|serves| HTTP
     subgraph Transport

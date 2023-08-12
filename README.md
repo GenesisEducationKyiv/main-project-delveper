@@ -1,4 +1,20 @@
-# Genesis Software Engineering School 3.0
+# xrate 
+>Genesis Software Engineering School 3.0 project
+
+## Description
+
+The **xrate** project solves the problem of providing a backend API for fetching currency exchange rates from base to
+quote currency pairs, which can be fiat or crypto.
+
+## Tooling
+
+### API
+
+The main service of the project.
+
+### Log consumer
+
+Command line tool for consuming kafka logs.
 
 ## Doc
 
@@ -8,13 +24,13 @@
 
 The application is divided into several key modules as detailed below:
 
-- **cmd**: Contains the application's entry point.
+- **app**: Contains the application's entry point with `ctrl` package which is use case controller responsible for binding all dependencies.
 - **data**: Contains file store, or raw data.
-- **docs**: Contains documentation files.
-- **internal**: Contains the core application logic divided into `rate`, `subscription`, and `transport` packages.
-- **scripts**: Contains auxiliary scripts for various tasks.
-- **sys**: Contains system-level packages like `env`, `filestore`, and `logger`.
-
+- **doc**: Contains openapi documentation.
+- **internal**: Contains the core application logic divided into `rate`, `subs`, and `notif` packages.
+- **script**: Contains auxiliary scripts for various tasks.
+- **sys**: Contains system-level packages like `env`,  `event`, `web`, `filestore`, and `logger`.
+- **test**: contains test related data like a *postman* collection with Dockerfile and `mock` package.
 Each module is responsible for a specific function within the application, allowing for clear separation of concerns and
 making the codebase easy to manage and navigate.
 
@@ -36,85 +52,6 @@ make docker-build
 make docker-run
  ```  
 
-## Module Tree
-
---- TODO: Update
-
-```
-📦xrate
- ┣ 📂.github
- ┃ ┗ 📂workflows
- ┃   ┣ 📜go.yml
- ┃   ┗ 📜golangci.yml
- ┣ 📂api
- ┃ ┣ 📜api.go
- ┃ ┣ 📜config.go
- ┃ ┗ 📜routes.go
- ┣ 📂cmd
- ┃ ┗ 📜main.go
- ┣ 📂doc
- ┃ ┗ 📜openapi.yaml
- ┣ 📂internal
- ┃ ┣ 📂rate
- ┃ ┃ ┣ 📜config.go
- ┃ ┃ ┣ 📂curxrt
- ┃ ┃ ┃ ┣ 📜alphavantage.go
- ┃ ┃ ┃ ┣ 📜coinapi.go
- ┃ ┃ ┃ ┣ 📜coinyep.go
- ┃ ┃ ┃ ┣ 📜curxrt.go
- ┃ ┃ ┃ ┣ 📜ninjas.go
- ┃ ┃ ┃ ┗ 📜xratehost.go
- ┃ ┃ ┣ 📜event.go
- ┃ ┃ ┣ 📜handler.go
- ┃ ┃ ┗ 📜rate.go
- ┃ ┗ 📂subs
- ┃   ┣ 📜config.go
- ┃   ┣ 📜event.go
- ┃   ┣ 📜handler.go
- ┃   ┣ 📜repo.go
- ┃   ┣ 📜repo_test.go
- ┃   ┣ 📜sender.go
- ┃   ┗ 📜subs.go
- ┣ 📂log
- ┃ ┗ 📜sys.log
- ┣ 📂sys
- ┃ ┣ 📂env
- ┃ ┃ ┣ 📜env.go
- ┃ ┃ ┗ 📜env_test.go
- ┃ ┣ 📂event
- ┃ ┃ ┗ 📜event.go
- ┃ ┣ 📂filestore
- ┃ ┃ ┣ 📜filestore.go
- ┃ ┃ ┗ 📜filestore_test.go
- ┃ ┣ 📂logger
- ┃ ┃ ┗ 📜logger.go
- ┃ ┗ 📂web
- ┃   ┣ 📜errors.go
- ┃   ┣ 📜middlewares.go
- ┃   ┣ 📜middlewares_test.go
- ┃   ┣ 📜params.go
- ┃   ┣ 📜request.go
- ┃   ┣ 📜respond.go
- ┃   ┗ 📜web.go
- ┣ 📂test
- ┃ ┣ 📂mock
- ┃ ┃ ┣ 📜email_repository.go
- ┃ ┃ ┣ 📜email_sender.go
- ┃ ┃ ┣ 📜getter.go
- ┃ ┃ ┗ 📜subscriber.go
- ┃ ┣ 📜Dockerfile
- ┃ ┗ 📜postman.json
- ┣ 📜.gitignore
- ┣ 📜.golangci.yml
- ┣ 📜Dockerfile
- ┣ 📜Makefile
- ┣ 📜README.md
- ┣ 📜docker-compose.yml
- ┣ 📜go.mod
- ┗ 📜go.sum
-
-```
-
 ## Architecture
 
 ```mermaid
@@ -129,7 +66,7 @@ graph TB
     NotificationAdapters -.->|impl| EmailSender
     SubscriptionService -.->|impl| SubscriptionServiceInterface
     RateService -.->|impl| RateServiceInterface
-    NotificationService -.->|impl|NotificationServiceInterface
+    NotificationService -.->|impl| NotificationServiceInterface
     Client[Client] -->|interacts| HTTP
     main -->|serves| HTTP
     subgraph Transport
